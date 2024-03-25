@@ -69,7 +69,7 @@ The training process is as follow.
 | Model               | #Experts | #Activated Experts | #Params | # Activated Params | Flops(T) per sample （se q=2048） | Model Weights                                                |
 | ------------------- | -------- | ------------------ | ------- | ------------------ | --------------------------------- | ------------------------------------------------------------ |
 | GPT without MoE     | -        | -                  | 265M    | 265M               | 0.48                              | [🤗 llama-265m](https://huggingface.co/JuncaiL/llama-265m)    |
-| 8 $\times$ 265M MoE | 2        | 8                  | 970M    | 332M               | 0.76                              | [🤗 llama-8x265m-moe](https://huggingface.co/JuncaiL/llama-8x265m-moe) |
+| 8 $\times$ 265M MoE | 8        | 2                  | 970M    | 332M               | 0.76                              | [🤗 llama-8x265m-moe](https://huggingface.co/JuncaiL/llama-8x265m-moe) |
 | llama-7b            | -        | -                  | 7B      | 7B                 | 25.29                             |                                                              |
 
 **Model Evaluation**
