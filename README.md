@@ -1,28 +1,42 @@
-
-
-## SpecMoE
+## SpecMoE : Building A Speculative MoE Model To Accelerate Inference
 
 The goal of SpecMoE is not to provide strong result than the well-known GPT models, such as llama-7b. **Our goal is to use small models with less layers to approximate the performance of those big GPT models. Therefore, we can achieve low latency in model inference  and get satisfied results.**  This technique is also know as Speculative Inference, in which we use small speculative model in model inference to produce sentences token by token, and then use the big model to verify the result with only one pass through the big model. In this way, Model Inference can be accelerated and the accuracy of the small speculative model influence the hit rate and thus the acceleration.
 
-SpecMoE provides two well-trained models. One is a two-layer GPT model and the other is a two-layer  Sparse MoE GPT model.
+📢 **SpecMoE provides two well-trained models for everyone!!** One is a two-layer GPT model and the other is a two-layer  Sparse MoE GPT model. The well-trained models are open-source in the Huggingface.The repo are `JuncaiL/llama-265m` ([🤗 llama-265m](https://huggingface.co/JuncaiL/llama-265m)) and `JuncaiL/llama-8x265m-moe`([🤗 llama-8x265m-moe](https://huggingface.co/JuncaiL/llama-8x265m-moe)), respectively.
 
 This repo also provides the training script of these two models.
 
 
 
-### 1. QuickStart and Usage
+### 1. 🚀QuickStart and Usage
 
 **Usage of the well-trained model**
 
+```python
+import torch
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+model_dir = "JuncaiL/llama-265m"
+#model_dir = "JuncaiL/llama-8x265m-moe" # if you want to use the MoE version, uncomment this line
+
+tokenizer = AutoTokenizer.from_pretrained(model_dir, trust_remote_code=True)
+model = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=True)
+model.eval()
+model.to("cuda:0")
+
+input_text = "Beijing is a famous city"
+inputs = tokenizer(input_text, return_tensors="pt",return_token_type_ids=False)
+inputs = inputs.to("cuda:0")
+
+pred = model.generate(**inputs, max_length=50, temperature=0.0)
+print(tokenizer.decode(pred.cpu()[0], skip_special_tokens=True))
+# Beijing is a famous city in China. It is the capital of the Beijing Province and the largest city in China. It is also the home of the world’s largest city, Beijing.
+#The city is the
 ```
-LlamaForCausalLM.from_pretrained( <huggingface/path> )
-```
 
 
 
-
-
-### 2.  Checkpoint Details and Evaluation
+### 2.  📑Checkpoint Details and Evaluation
 
 #### Training script
 
@@ -52,11 +66,11 @@ The training process is as follow.
 
 **Model Parameter**
 
-| Model               | #Experts | #Activated Experts | #Params | # Activated Params | Flops(T) per sample （se q=2048） |
-| ------------------- | -------- | ------------------ | ------- | ------------------ | --------------------------------- |
-| GPT without MoE     | -        | -                  | 265M    | 265M               | 0.48                              |
-| 8 $\times$ 265M MoE | 2        | 8                  | 970M    | 332M               | 0.76                              |
-| llama-7b            | -        | -                  | 7B      | 7B                 | 25.29                             |
+| Model               | #Experts | #Activated Experts | #Params | # Activated Params | Flops(T) per sample （se q=2048） | Model Weights                                                |
+| ------------------- | -------- | ------------------ | ------- | ------------------ | --------------------------------- | ------------------------------------------------------------ |
+| GPT without MoE     | -        | -                  | 265M    | 265M               | 0.48                              | [🤗 llama-265m](https://huggingface.co/JuncaiL/llama-265m)    |
+| 8 $\times$ 265M MoE | 2        | 8                  | 970M    | 332M               | 0.76                              | [🤗 llama-8x265m-moe](https://huggingface.co/JuncaiL/llama-8x265m-moe) |
+| llama-7b            | -        | -                  | 7B      | 7B                 | 25.29                             |                                                              |
 
 **Model Evaluation**
 
@@ -90,7 +104,7 @@ $$ p = 1 + \frac{1-\sqrt{1+4N}}{2N}$$
 
 
 
-### Limitation and Future Plans
+### 3. 🚧Limitation and Future Plans
 
 For the MoE model, we show the accuracy about how this small speculative model approximate the performance of llama-7b. In practice, to achieve physically low latency, the implementation of our MoE needs to be improve. In this version, we calculate the result of MoE expert by expert (sequentially) , and we need to fuse the calculation of these experts.
 
@@ -98,8 +112,22 @@ For the MoE model, we show the accuracy about how this small speculative model a
 
 ### Acknowledgement
 
-1. Our implementation of MoE structure base on the repo `https://huggingface.co/llama-moe/LLaMA-MoE-v1-3_5B-2_8`
-2. Our inspiration of Speculative Inference comes from the paper "SpecInfer: Accelerating Generative Large Language Model Serving with Tree-based Speculative Inference and Verification" ([link](https://arxiv.org/abs/2305.09781)) 
+1. My implementation of MoE structure base on the repo `https://huggingface.co/llama-moe/LLaMA-MoE-v1-3_5B-2_8`
+2. My inspiration of Speculative Inference comes from the paper "SpecInfer: Accelerating Generative Large Language Model Serving with Tree-based Speculative Inference and Verification" ([link](https://arxiv.org/abs/2305.09781)) . I am very appreciated for the help and suggestions from the SpecInfer group. ❤️
+
+
+
+### Citation
+
+```
+@misc{specmoe-2024,
+  title={SpecMoE: Building A Speculative MoE Model To Accelerate Inference},
+  author={Juncai Liu},
+  year={2024},
+  month={March},
+  url={https://github.com/JuncaiL/SpecMoE/}
+}
+```
 
 
 
@@ -107,6 +135,4 @@ For the MoE model, we show the accuracy about how this small speculative model a
 
 If you have any interest or question about this project, please feel free to contact me.
 
-`liujc19@mails.tsinghua.edu.cn` （before June 30, 2024） or
-
-`liujc19@tsinghua.org.cn` （After June 30, 2024） 
+`liujc19@mails.tsinghua.edu.cn` （before June 30, 2024） or `liujc19@tsinghua.org.cn` （After June 30, 2024） 
