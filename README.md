@@ -1,6 +1,6 @@
 ## SpecMoE : Building A Speculative MoE Model To Accelerate Inference
 
-The goal of SpecMoE is not to provide strong result than the well-known GPT models, such as llama-7b. **Our goal is to use small models with less layers to approximate the performance of those big GPT models. Therefore, we can achieve low latency in model inference  and get satisfied results.**  This technique is also know as Speculative Inference, in which we use small speculative model in model inference to produce sentences token by token, and then use the big model to verify the result with only one pass through the big model. In this way, Model Inference can be accelerated and the accuracy of the small speculative model influence the hit rate and thus the acceleration.
+The goal of SpecMoE is not to provide strong result than the well-known GPT models, such as llama-7b. **Our goal is to use small models with fewer layers to approximate the performance of those big GPT models. Therefore, we can achieve low latency in model inference and get satisfied results.**  This technique is also known as Speculative Inference, in which we use small speculative model in model inference to produce sentences token by token, and then use the big model to verify the result with only one pass through the big model. In this way, Model Inference can be accelerated and the accuracy of the small speculative model influences the hit rate and thus the acceleration.
 
 📢 **SpecMoE provides two well-trained models for everyone!!** One is a two-layer GPT model and the other is a two-layer  Sparse MoE GPT model. The well-trained models are open-source in the Huggingface.The repo are `JuncaiL/llama-265m` ([🤗 llama-265m](https://huggingface.co/JuncaiL/llama-265m)) and `JuncaiL/llama-8x265m-moe`([🤗 llama-8x265m-moe](https://huggingface.co/JuncaiL/llama-8x265m-moe)), respectively.
 
@@ -50,7 +50,7 @@ bash train_llama.sh
 bash train_llama_c4.sh   
 
 
-# Evaluation
+# evaluate
 python3 ssm_evaluate.py --dataset_name alpaca --checkpoint_path <checkpoint_dir>/pytorch_model.bin
 ```
 
@@ -58,7 +58,7 @@ python3 ssm_evaluate.py --dataset_name alpaca --checkpoint_path <checkpoint_dir>
 
 #### Training Method and Training loss 
 
-We train both two models ("GPT without MoE" and "8 $\times$ 265M MoE") from scratch with FP32 precision. We firstly train the model through  wikipedia dataset with 1 epoch and then through 10% of C4 dataset (10 data shards among 1024 data shards) with 1 epoch.
+We train both two models ("GPT without MoE" and "8 $\times$ 265M MoE") from scratch with FP32 precision. We firstly train the model through wikipedia dataset with 1 epoch and then through 10% of C4 dataset (10 data shards among 1024 data shards) with 1 epoch.
 
 The training process is as follow.
 
@@ -74,7 +74,7 @@ The training process is as follow.
 
 **Model Evaluation**
 
-We use the "Average number of tokens verified" $N$ ( see reference  [link](https://arxiv.org/abs/2305.09781) ） as the metric to evaluate these models. These metric demonstrates that giving the same input to the small speculative model and llama-7b, counting from the first predicted tokens, how many successive tokens in the output sentence of the small speculative model are the same as the output sentence of the  llama-7b.
+We use the "Average number of tokens verified" $N$ ( see reference  [link](https://arxiv.org/abs/2305.09781) ） as the metric to evaluate these models. This metric demonstrates that giving the same input to the small speculative model and llama-7b, counting from the first predicted tokens, how many successive tokens in the output sentence of the small speculative model are the same as the output sentence of the  llama-7b.
 
 - **Average number of tokens verified**
 
@@ -106,14 +106,14 @@ $$ p = 1 + \frac{1-\sqrt{1+4N}}{2N}$$
 
 ### 3. 🚧Limitation and Future Plans
 
-For the MoE model, we show the accuracy about how this small speculative model approximate the performance of llama-7b. In practice, to achieve physically low latency, the implementation of our MoE needs to be improve. In this version, we calculate the result of MoE expert by expert (sequentially) , and we need to fuse the calculation of these experts.
+For the MoE model, we show the accuracy of how this small speculative model approximates the performance of llama-7b. In practice, to achieve physically low latency, the implementation of our MoE needs to be improved. In this version, we calculate the result of MoE expert by expert (sequentially) , and we need to fuse the calculation of these experts.
 
 
 
-### Acknowledgement
+### Acknowledgment
 
-1. My implementation of MoE structure base on the repo `https://huggingface.co/llama-moe/LLaMA-MoE-v1-3_5B-2_8`
-2. My inspiration of Speculative Inference comes from the paper "SpecInfer: Accelerating Generative Large Language Model Serving with Tree-based Speculative Inference and Verification" ([link](https://arxiv.org/abs/2305.09781)) . I am very appreciated for the help and suggestions from the SpecInfer group. ❤️
+1. My implementation of MoE structure is based on the repo `https://huggingface.co/llama-moe/LLaMA-MoE-v1-3_5B-2_8`
+2. My inspiration for Speculative Inference comes from the paper "SpecInfer: Accelerating Generative Large Language Model Serving with Tree-based Speculative Inference and Verification" ([link](https://arxiv.org/abs/2305.09781)) . I am very appreciative of the help and suggestions from the SpecInfer group. ❤️
 
 
 
